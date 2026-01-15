@@ -517,11 +517,73 @@ button{
   border-width: 1px;
   border-style: solid;
 }
+/* ===== Matrix digital rain background ===== */
+.matrix-rain{
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: .22;              /* регулируй интенсивность */
+  mix-blend-mode: screen;    /* красиво смешивается с темным фоном */
+  filter: saturate(1.15) contrast(1.05);
+}
+
+/* keep your UI above the rain */
+.container{ position: relative; z-index: 2; }
+
+/* Rain built from 2 layers of repeating gradients that "fall" */
+.matrix-rain::before,
+.matrix-rain::after{
+  content:"";
+  position:absolute;
+  inset:-200% 0 0 0; /* extra height for smooth scroll */
+  background:
+    /* columns with glyph blocks */
+    repeating-linear-gradient(
+      90deg,
+      rgba(0,255,120,.00) 0px,
+      rgba(0,255,120,.00) 10px,
+      rgba(0,255,120,.10) 12px,
+      rgba(0,255,120,.00) 14px
+    ),
+    /* vertical "drops" */
+    repeating-linear-gradient(
+      180deg,
+      rgba(0,255,120,.00) 0px,
+      rgba(0,255,120,.00) 14px,
+      rgba(0,255,120,.22) 16px,
+      rgba(0,255,120,.00) 22px
+    );
+  background-size: 22px 100%, 100% 26px;
+  transform: translateY(-50%);
+  animation: matrixFall 12s linear infinite;
+}
+
+/* second layer: different speed + slight blur for depth */
+.matrix-rain::after{
+  opacity: .55;
+  filter: blur(.35px);
+  background-size: 28px 100%, 100% 34px;
+  animation: matrixFall2 18s linear infinite;
+}
+
+@keyframes matrixFall{
+  from { transform: translateY(-50%); }
+  to   { transform: translateY(0%); }
+}
+
+@keyframes matrixFall2{
+  from { transform: translateY(-60%); }
+  to   { transform: translateY(0%); }
+}
+
 </style>
 
 
 </head>
 <body>
+  <div class="matrix-rain" aria-hidden="true"></div>
   <div class="container">
     <div class="header">
       <div>
