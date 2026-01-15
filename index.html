@@ -456,6 +456,67 @@
     .message.me{ margin-left: 0; }
     .message.other{ margin-right: 0; }
   }
+  /* ===== Angular / serious: no rounded corners ===== */
+:root{
+  --radius: 0px; /* override */
+}
+
+/* Global kill-switch for roundness */
+.container,
+.messages, .participants,
+.messages::before, .participants::before,
+.message,
+.input-row input,
+button,
+.nickname,
+.status,
+#participants > div {
+  border-radius: 0 !important;
+}
+
+/* Status dot can stay round; if you want it square too: */
+.status::before{
+  border-radius: 0 !important;
+}
+
+/* Message accent bar: remove rounding */
+.message::before{
+  border-radius: 0 !important;
+}
+
+/* Scrollbar: square thumb */
+.messages::-webkit-scrollbar-thumb,
+.participants::-webkit-scrollbar-thumb{
+  border-radius: 0 !important;
+}
+
+/* Optional: sharper, more "panel" feel */
+.container{
+  border: 1px solid rgba(0,255,120,.22) !important;
+}
+
+.header{
+  border-bottom: 1px solid rgba(0,255,120,.18) !important;
+}
+
+/* Make participants items look like list rows instead of pills */
+#participants > div{
+  border-left: 2px solid rgba(0,255,120,.35);
+  margin-bottom: 6px;
+}
+
+/* Make status/nickname feel like tags (not pills) */
+.status, .nickname{
+  padding: 6px 10px;
+  background: rgba(0,0,0,.22);
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+/* Tighten buttons into "command keys" */
+button{
+  border-width: 1px;
+  border-style: solid;
+}
 </style>
 
 
@@ -464,7 +525,7 @@
   <div class="container">
     <div class="header">
       <div>
-        <div>Одноимённый канал</div>
+        <div class="channel-title" data-text="Одноимённый канал">Одноимённый канал</div>
         <div class="status" id="status">Статус: отключено</div>
       </div>
       <div>
