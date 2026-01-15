@@ -335,6 +335,127 @@
     .messages, .participants{ height: 320px; }
     .header{ flex-direction: column; align-items:flex-start; }
   }
+
+  .channel-title {
+    position: relative;
+    display: inline-block;
+    font-weight: 800;
+    letter-spacing: .9px;
+    text-transform: uppercase;
+    color: rgba(210,255,230,.92);
+    text-shadow:
+      0 0 12px rgba(0,255,120,.10),
+      0 0 26px rgba(0,255,120,.06);
+  }
+
+  /* Glitch layers */
+  .channel-title::before,
+  .channel-title::after{
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: .0;
+  }
+
+  .channel-title::before{
+    transform: translateX(-1px);
+    color: rgba(120,230,255,.85);
+    text-shadow: 0 0 16px rgba(120,230,255,.20);
+  }
+
+  .channel-title::after{
+    transform: translateX(1px);
+    color: rgba(255,77,109,.70);
+    text-shadow: 0 0 16px rgba(255,77,109,.18);
+  }
+
+  /* Trigger glitch on hover and occasionally via animation */
+  .channel-title:hover::before,
+  .channel-title:hover::after{
+    opacity: .9;
+    animation: glitch 420ms steps(2,end) infinite;
+  }
+
+  /* Ambient glitch pulse (subtle) */
+  .channel-title{
+    animation: glitchPulse 6.5s infinite;
+  }
+
+  @keyframes glitchPulse{
+    0%, 92%, 100% { filter: none; }
+    93% { filter: brightness(1.08) contrast(1.05); }
+    94% { filter: none; }
+    95% { filter: brightness(1.10) contrast(1.08); }
+    96% { filter: none; }
+  }
+
+  @keyframes glitch{
+    0%   { clip-path: inset(0 0 88% 0); transform: translate(-1px, -1px); }
+    20%  { clip-path: inset(12% 0 60% 0); transform: translate(2px, 0); }
+    40%  { clip-path: inset(40% 0 35% 0); transform: translate(-2px, 1px); }
+    60%  { clip-path: inset(70% 0 15% 0); transform: translate(1px, -1px); }
+    80%  { clip-path: inset(8% 0 75% 0); transform: translate(-1px, 0); }
+    100% { clip-path: inset(0 0 88% 0); transform: translate(1px, 1px); }
+  }
+
+  /* Message variants */
+  .message.me{
+    border-color: rgba(0,255,120,.20);
+    background: rgba(0,255,120,.06);
+    box-shadow:
+      0 0 0 1px rgba(0,255,120,.10) inset,
+      0 0 18px rgba(0,255,120,.08);
+  }
+
+  .message.other{
+    border-color: rgba(120,230,255,.14);
+    background: rgba(120,230,255,.04);
+    box-shadow:
+      0 0 0 1px rgba(120,230,255,.08) inset;
+  }
+
+  /* Different left accent for each */
+  .message.me::before{
+    background: rgba(0,255,120,.75);
+    box-shadow: 0 0 14px rgba(0,255,120,.25);
+  }
+
+  .message.other::before{
+    background: rgba(120,230,255,.60);
+    box-shadow: 0 0 14px rgba(120,230,255,.18);
+  }
+
+  /* Author styling inside message */
+  .message .author{
+    color: rgba(210,255,230,.92);
+  }
+
+  .message.me .author{
+    color: rgba(0,255,120,.92);
+    text-shadow: 0 0 10px rgba(0,255,120,.14);
+  }
+
+  .message.other .author{
+    color: rgba(120,230,255,.92);
+    text-shadow: 0 0 10px rgba(120,230,255,.12);
+  }
+
+  /* Align "me" slightly to the right for chat feel */
+  .message.me{
+    margin-left: 10%;
+  }
+  .message.other{
+    margin-right: 10%;
+  }
+
+  @media (max-width: 860px){
+    .message.me{ margin-left: 0; }
+    .message.other{ margin-right: 0; }
+  }
 </style>
 
 
@@ -401,16 +522,39 @@
 
       function setStatus(text) {
         statusEl.textContent = `Статус: ${text}`;
+        const t = String(text).toLowerCase();
+        statusEl.dataset.state =
+          t.includes('подключено') ? 'ok' :
+          (t.includes('ошибка') || t.includes('нет соединения') || t.includes('нужно перелогиниться')) ? 'bad' :
+          '';
+      }
+
+
+      function escapeHtml(str) {
+        return String(str)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
       }
 
       function renderMessage({ author, content, timestamp }) {
         const item = document.createElement('div');
-        item.className = 'message';
+      
+        const isMe = String(author) === String(nicknameEl.textContent || nickname);
+        item.className = `message ${isMe ? 'me' : 'other'}`;
+      
         const time = new Date(timestamp).toLocaleTimeString();
+      
         item.innerHTML = `
-          <div>${author}: ${content}</div>
-          <div class="meta">${time}</div>
+          <div>
+            <span class="author">${escapeHtml(author)}:</span>
+            <span class="content">${escapeHtml(content)}</span>
+          </div>
+          <div class="meta">${escapeHtml(time)}</div>
         `;
+      
         messagesEl.appendChild(item);
         messagesEl.scrollTop = messagesEl.scrollHeight;
       }
