@@ -662,25 +662,42 @@ button{
           .replaceAll("'", '&#039;');
       }
 
-      function renderMessage({ author, content, timestamp }) {
-        const item = document.createElement('div');
-      
-        const isMe = String(author) === String(nicknameEl.textContent || nickname);
-        item.className = `message ${isMe ? 'me' : 'other'}`;
-      
-        const time = new Date(timestamp).toLocaleTimeString();
-      
-        item.innerHTML = `
-          <div>
-            <span class="author">${escapeHtml(author)}:</span>
-            <span class="content">${escapeHtml(content)}</span>
-          </div>
-          <div class="meta">${escapeHtml(time)}</div>
-        `;
-      
-        messagesEl.appendChild(item);
-        messagesEl.scrollTop = messagesEl.scrollHeight;
+      function isNearBottom(el, threshold = 40) {
+        return el.scrollTop + el.clientHeight >= el.scrollHeight - threshold;
       }
+      
+      function scrollToBottom() {
+        requestAnimationFrame(() => {
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+        });
+      }
+
+
+     function renderMessage({ author, content, timestamp }) {
+      const shouldStick = isNearBottom(messagesEl);
+    
+      const item = document.createElement('div');
+    
+      const isMe = String(author) === String(nicknameEl.textContent || nickname);
+      item.className = `message ${isMe ? 'me' : 'other'}`;
+    
+      const time = new Date(timestamp).toLocaleTimeString();
+    
+      item.innerHTML = `
+        <div>
+          <span class="author">${escapeHtml(author)}:</span>
+          <span class="content">${escapeHtml(content)}</span>
+        </div>
+        <div class="meta">${escapeHtml(time)}</div>
+      `;
+    
+      messagesEl.appendChild(item);
+    
+      if (shouldStick) {
+        scrollToBottom(); // внутри requestAnimationFrame
+      }
+    }
+
 
       function renderParticipants(list) {
         participantsEl.innerHTML = '';
